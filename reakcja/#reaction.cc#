@@ -1,0 +1,79 @@
+// compile with:  g++ -o reaction.x reaction.cc `root-config --cflags --glibs`
+
+# include <cstdlib>  
+# include <iostream> 
+# include "TRandom.h"  
+# include "TH1.h" 
+# include "TF1.h"
+# include "TH2.h"
+# include "TCanvas.h"
+# include "TApplication.h"
+# include "TLorentzVector.h"
+# include "TGenPhaseSpace.h"
+# include "TFile.h"
+# include <cmath>
+
+ 
+using namespace std;
+
+
+TString home_path=Form("/home/mateusz/Desktop/reakcja/wynik.root");
+
+
+int main()
+{    
+   TApplication theApp("App",0,0);
+   TFile outfile(home_path.Data(),"recreate");
+
+  
+   TCanvas *c1 = new TCanvas("c1","transparent pad",200,10,700,500);
+   // TCanvas *c2 = new TCanvas("c2","transparent pad",200,10,700,500);
+   c1->cd();
+   TH1* h = new TH1D("h","pProton1 theta",100,0,3.5);
+   TH1 *h1 = new TH1D("h1","pProton2 theta",100,0,3.5);
+   TH1 *h2 = new TH1D("h2","pPion1 theta",100,0,3.5);
+   TH1 *h3 = new TH1D()
+   TLorentzVector target(0.0, 0.0, 0.0, 1.8755);//mn+mp-Dm
+   TLorentzVector beam(0.0, 0.0, 0.700, 1.1704);//E=sqrt(0.700^2+0.938^2)
+   TLorentzVector W = beam + target;
+
+   TVector3 boost= W.BoostVector();
+   cout<< "Masa niezmiennicza przed rozpadem przed boostem  "<<(beam+target).Mag()<<endl;
+   cout << "boost:"<<boost.Z() << endl;
+   beam.Boost(W.BoostVector());
+   target.Boost(W.BoostVector());
+   cout<<"Masa niezmiennicza przed rozpadem po booscie  "<<(beam+target).Mag()<<endl;
+   //(Momentum, Energy units are Gev/C, GeV)
+   Double_t masses[4] = { 0.938, 0.938, 0.139, 0.139};
+   TGenPhaseSpace event;
+   event.SetDecay(W, 4, masses);
+   TLorentzVector x;
+   for (Int_t n=0;n<1000;n++) {
+      Double_t weight = event.Generate();
+      TLorentzVector *pProton1 = event.GetDecay(0);
+      TLorentzVector *pProton2 = event.GetDecay(1);
+      TLorentzVector *pPion1 = event.GetDecay(2);
+      TLorentzVector *pPion2= event.GetDecay(3);
+      
+      x=*pProton1+*pProton2+*pPion1+*pPion2;
+     
+    
+      h->Fill(pProton1->Theta(),weight);
+      h1->Fill(pProton2->Theta(),weight);
+      h2->Fill(pPion1->Phi(),weight);
+      h3->Fill(pPion2->Phi(),weight);
+      h4->Fill
+    
+   }
+    cout<<"Masa niezmiennicza po rozpadzie  "<<x.Mag()<<endl;
+    outfile.Write();
+    outfile.Close();
+    
+  
+     theApp.Run();
+	 return 0;
+}
+
+
+
+

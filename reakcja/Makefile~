@@ -1,0 +1,4 @@
+CC=g++
+
+reaction:
+	$(CC) -o  reaction.x reaction.cc `root-config --cflags --glibs`
